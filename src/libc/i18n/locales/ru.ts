@@ -198,4 +198,23 @@ export const ru: Record<TranslationKey, string> = {
   "onboarding.skip": "Пропустить",
   "onboarding.next": "Далее",
   "onboarding.done": "Понятно",
+  "seo.convertNow": "Конвертировать {{from}} в {{to}}",
+  "seo.badges.private": "100% приватно",
+  "seo.badges.free": "Бесплатно навсегда",
+  "seo.badges.noLimits": "Без лимитов",
+  "seo.howItWorks": "Как это работает",
+  "seo.step1.title": "Перетащите файлы",
+  "seo.step1.text":
+    "Drag & drop, клик или вставка из буфера. Сколько угодно файлов любого размера.",
+  "seo.step2.title": "Выберите формат",
+  "seo.step2.text":
+    "Формат, качество, размер. Превью результата в реальном времени.",
+  "seo.step3.title": "Скачайте мгновенно",
+  "seo.step3.text":
+    "Файлы не покидают устройство. По одному или ZIP-архивом.",
+  "seo.faq": "Частые вопросы",
+  "seo.related": "Похожие конвертации",
+  "seo.cta.title": "Сконвертировать {{from}} в {{to}}",
+  "seo.cta.button": "Открыть конвертер",
+  "seo.notFound": "Страница не найдена",
 };

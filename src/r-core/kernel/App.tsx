@@ -52,29 +52,24 @@ import type { PdfSettings } from "@/c-core/drivers/pdf/types";
 type TabMeta = {
   accept: string;
   extensions: string[];
-  labelKey: "drop.images" | "drop.data" | "drop.pdf" | "drop.media";
 };
 
 const TAB_META: Record<TabId, TabMeta> = {
   images: {
     accept: IMAGE_INPUT_ACCEPT,
     extensions: IMAGE_INPUT_EXTENSIONS,
-    labelKey: "drop.images",
   },
   data: {
     accept: DATA_INPUT_ACCEPT,
     extensions: DATA_INPUT_EXTENSIONS,
-    labelKey: "drop.data",
   },
   pdf: {
     accept: PDF_INPUT_ACCEPT,
     extensions: PDF_INPUT_EXTENSIONS,
-    labelKey: "drop.pdf",
   },
   media: {
     accept: "audio/*,video/*",
     extensions: ["mp3", "mp4", "wav", "mov", "webm", "ogg"],
-    labelKey: "drop.media",
   },
 };
 
@@ -290,9 +285,8 @@ export default function App({ onBack }: Props) {
                 tab={tab}
                 acceptedExtensions={meta.extensions}
                 acceptedMime={meta.accept}
-                labelKey={meta.labelKey}
               />
-              <QuickActions onSelect={(t) => select(t)} />
+              <QuickActions onSelect={(nextTab) => select(nextTab)} />
             </>
           ) : (
             <div className="space-y-5 sm:space-y-6">
@@ -336,7 +330,6 @@ export default function App({ onBack }: Props) {
                 tab={tab}
                 acceptedExtensions={meta.extensions}
                 acceptedMime={meta.accept}
-                labelKey={meta.labelKey}
               />
 
               <FileList

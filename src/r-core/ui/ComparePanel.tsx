@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import type { ConvertResult } from "@/abi";
 import {
   formatFileSize,
-  formatDimensions,
   sizeDiffPercent,
   formatPercent,
 } from "@/libc/format";

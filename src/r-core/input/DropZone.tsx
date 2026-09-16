@@ -9,11 +9,6 @@ type Props = {
   tab: TabId;
   acceptedExtensions: string[];
   acceptedMime: string;
-  labelKey:
-    | "drop.images"
-    | "drop.data"
-    | "drop.pdf"
-    | "drop.media";
 };
 
 export default function DropZone({
@@ -21,7 +16,6 @@ export default function DropZone({
   compact = false,
   acceptedExtensions,
   acceptedMime,
-  labelKey,
 }: Props) {
   const { t } = useT();
   const [isDragging, setIsDragging] = useState(false);

@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { TabId } from "@/abi";
 import { useT } from "@/libc/i18n/useT";
 
 export type CommandAction = {

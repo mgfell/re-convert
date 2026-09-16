@@ -198,4 +198,23 @@ export const en: Record<TranslationKey, string> = {
   "onboarding.skip": "Skip",
   "onboarding.next": "Next",
   "onboarding.done": "Got it",
+  "seo.convertNow": "Convert {{from}} to {{to}}",
+  "seo.badges.private": "100% private",
+  "seo.badges.free": "Free forever",
+  "seo.badges.noLimits": "No limits",
+  "seo.howItWorks": "How it works",
+  "seo.step1.title": "Drop your files",
+  "seo.step1.text":
+    "Drag & drop, click, or paste from clipboard. Any number of files, any size.",
+  "seo.step2.title": "Pick the format",
+  "seo.step2.text":
+    "Choose output format, quality and size. See a live preview of the result.",
+  "seo.step3.title": "Download instantly",
+  "seo.step3.text":
+    "Files never leave your device. Download one by one or as a ZIP.",
+  "seo.faq": "Frequently asked questions",
+  "seo.related": "Related conversions",
+  "seo.cta.title": "Convert {{from}} to {{to}} now",
+  "seo.cta.button": "Open converter",
+  "seo.notFound": "Page not found",
 };
