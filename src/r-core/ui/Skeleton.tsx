@@ -5,7 +5,7 @@ type Props = {
 export default function Skeleton({ className = "" }: Props) {
   return (
     <div
-      className={`animate-pulse rounded-xl bg-white/[0.04] border border-white/[0.04] ${className}`}
+      className={`shimmer rounded-xl bg-white/[0.04] border border-white/[0.04] ${className}`}
     />
   );
 }

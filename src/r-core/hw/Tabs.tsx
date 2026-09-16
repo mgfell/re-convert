@@ -84,7 +84,7 @@ export default function Tabs({ active, onSelect }: Props) {
             key={tab.id}
             onClick={() => !disabled && onSelect(tab.id)}
             disabled={disabled}
-            className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm transition-all ${
+            className={`relative flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm transition-all duration-300 ${
               isActive
                 ? "bg-white/[0.09] text-white border border-white/15"
                 : disabled
@@ -92,7 +92,13 @@ export default function Tabs({ active, onSelect }: Props) {
                 : "text-white/50 hover:text-white/80 border border-transparent"
             }`}
           >
-            {ICONS[tab.icon]}
+            <span
+              className={`transition-transform duration-300 ${
+                isActive ? "scale-110" : ""
+              }`}
+            >
+              {ICONS[tab.icon]}
+            </span>
             <span className="font-medium tracking-wide">
               {t(`tabs.${tab.id}` as const)}
             </span>

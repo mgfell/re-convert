@@ -29,7 +29,11 @@ export default function FileRow({ job, onRemove, onConvertOne }: Props) {
   };
 
   return (
-    <div className="glass-soft rounded-2xl p-4 transition-colors animate-row-in">
+    <div
+      className={`glass-soft rounded-2xl p-4 transition-colors animate-row-in ${
+        isProcessing ? "processing-border" : ""
+      }`}
+    >
       <div className="flex items-start gap-3">
         <FileIcon extension={ext} />
 
@@ -50,13 +54,13 @@ export default function FileRow({ job, onRemove, onConvertOne }: Props) {
 
             {isDone && job.result && (
               <>
-                <span className="w-px h-3 bg-white/15" />
+                <span className="divider-y h-3" />
                 <span className="text-emerald-300/70">
                   {formatFileSize(job.result.size)}
                 </span>
                 {job.result.width && job.result.height && (
                   <>
-                    <span className="w-px h-3 bg-white/15" />
+                    <span className="divider-y h-3" />
                     <span>
                       {formatDimensions(job.result.width, job.result.height)}
                     </span>
@@ -67,13 +71,13 @@ export default function FileRow({ job, onRemove, onConvertOne }: Props) {
 
             {isError && (
               <>
-                <span className="w-px h-3 bg-white/15" />
+                <span className="divider-y h-3" />
                 <span className="text-red-300/70 truncate">
                   {job.error ?? "Unknown error"}
                 </span>
                 {job.attempts > 1 && (
                   <>
-                    <span className="w-px h-3 bg-white/15" />
+                    <span className="divider-y h-3" />
                     <span className="text-white/30">
                       attempt {job.attempts}
                     </span>

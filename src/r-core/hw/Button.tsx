@@ -10,13 +10,15 @@ type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
 };
 
 const base =
-  "inline-flex items-center justify-center gap-2 rounded-2xl font-medium transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed";
+  "inline-flex items-center justify-center gap-2 rounded-2xl font-medium transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed will-change-transform";
 
 const variants: Record<Variant, string> = {
   primary:
-    "bg-white text-neutral-900 hover:bg-white/90 active:scale-[0.99] shadow-[0_1px_0_0_rgba(255,255,255,0.15)_inset,0_12px_32px_-12px_rgba(255,255,255,0.25)]",
-  ghost: "glass-soft text-white/70 hover:text-white hover:bg-white/[0.06]",
-  subtle: "text-white/50 hover:text-white hover:bg-white/[0.05]",
+    "bg-white text-neutral-900 hover:bg-white/95 active:scale-[0.98] shadow-[0_1px_0_0_rgba(255,255,255,0.15)_inset,0_12px_32px_-12px_rgba(255,255,255,0.3)] hover:shadow-[0_1px_0_0_rgba(255,255,255,0.2)_inset,0_16px_40px_-12px_rgba(255,255,255,0.45)]",
+  ghost:
+    "glass-soft text-white/70 hover:text-white hover:bg-white/[0.06] active:scale-[0.98]",
+  subtle:
+    "text-white/50 hover:text-white hover:bg-white/[0.05] active:scale-[0.98]",
 };
 
 const sizes: Record<Size, string> = {

@@ -6,6 +6,8 @@ export { default as FileRow } from "./FileRow";
 export { default as SortableFileRow } from "./SortableFileRow";
 export { default as FileList } from "./FileList";
 export { default as ComparePanel } from "./ComparePanel";
+export { default as StatBadge } from "./StatBadge";
+export { default as QuickActions } from "./QuickActions";
 export { default as Skeleton, FileRowSkeleton } from "./Skeleton";
 export { default as ShortcutsHint } from "./ShortcutsHint";
 export * from "./toast";

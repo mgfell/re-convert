@@ -1,7 +1,14 @@
 import { useCallback, useMemo, useState } from "react";
 import type { TabId } from "@/abi";
 import { Button, Tabs, ThemeToggle, LangToggle } from "../hw";
-import { Header, Footer, FileList, ShortcutsHint } from "../ui";
+import {
+  Header,
+  Footer,
+  FileList,
+  ShortcutsHint,
+  StatBadge,
+  QuickActions,
+} from "../ui";
 import {
   DropZone,
   useKeyboard,
@@ -10,6 +17,9 @@ import {
 } from "../input";
 import { useTheme } from "../vga/hooks/useTheme";
 import { useActiveTab } from "./useActiveTab";
+import { useCommandPalette } from "./useCommandPalette";
+import CommandPalette, { type CommandAction } from "./CommandPalette";
+import { Onboarding, shouldShowOnboarding } from "../onboarding";
 import { useBatchConverter } from "@/c-core/scheduler/useBatchConverter";
 import { buildZip } from "@/c-core/fs/zip";
 import { downloadBlob } from "@/c-core/fs/download";
@@ -68,9 +78,16 @@ const TAB_META: Record<TabId, TabMeta> = {
   },
 };
 
-export default function App() {
+type Props = {
+  onBack: () => void;
+};
+
+export default function App({ onBack }: Props) {
   const { tab, select, auto } = useActiveTab("images");
   const { t, toggle: toggleLocale } = useT();
+  const [showOnboarding, setShowOnboarding] = useState(() =>
+    shouldShowOnboarding()
+  );
 
   const {
     jobs,
@@ -94,6 +111,7 @@ export default function App() {
 
   const { push } = useToast();
   const { toggle: toggleTheme } = useTheme();
+  const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette();
   const [zipping, setZipping] = useState(false);
   const [downloadOpen, setDownloadOpen] = useState(false);
 
@@ -101,7 +119,7 @@ export default function App() {
   const canConvert = stats.queued + stats.errors > 0 && !isBusy;
   const canZip = stats.done > 0 && !zipping;
 
-  const handleZip = async () => {
+  const handleZip = useCallback(async () => {
     try {
       setZipping(true);
       const { blob, name, count } = await buildZip(jobs);
@@ -116,26 +134,113 @@ export default function App() {
       setZipping(false);
       setDownloadOpen(false);
     }
-  };
+  }, [jobs, push, t]);
 
-  const handleDownloadSeparate = () => {
+  const handleDownloadSeparate = useCallback(() => {
     downloadAllSeparate();
     setDownloadOpen(false);
-  };
+  }, [downloadAllSeparate]);
 
   const handleFiles = useCallback(
     (files: File[]) => {
       if (!files.length) return;
-
       const detected = detectFileType(files[0]);
       if (detected) auto(detected);
-
       addFiles(files);
     },
     [addFiles, auto]
   );
 
   usePasteFiles(handleFiles);
+
+  const commands = useMemo<CommandAction[]>(
+    () => [
+      {
+        id: "convert",
+        label: t("command.action.convert"),
+        group: t("command.group.actions"),
+        shortcut: ["Ctrl", "↵"],
+        onRun: convertAll,
+        when: () => canConvert,
+      },
+      {
+        id: "cancel",
+        label: t("command.action.cancel"),
+        group: t("command.group.actions"),
+        onRun: cancelAll,
+        when: () => isBusy,
+      },
+      {
+        id: "download-zip",
+        label: t("command.action.downloadZip"),
+        group: t("command.group.actions"),
+        onRun: () => handleZip(),
+        when: () => canZip,
+      },
+      {
+        id: "download-separate",
+        label: t("command.action.downloadSeparate"),
+        group: t("command.group.actions"),
+        onRun: handleDownloadSeparate,
+        when: () => stats.done > 0,
+      },
+      {
+        id: "clear",
+        label: t("command.action.clear"),
+        group: t("command.group.actions"),
+        onRun: clearAll,
+        when: () => hasJobs && !isBusy,
+      },
+      {
+        id: "tab-images",
+        label: t("command.action.openImages"),
+        group: t("command.group.tabs"),
+        onRun: () => select("images"),
+      },
+      {
+        id: "tab-data",
+        label: t("command.action.openData"),
+        group: t("command.group.tabs"),
+        onRun: () => select("data"),
+      },
+      {
+        id: "tab-pdf",
+        label: t("command.action.openPdf"),
+        group: t("command.group.tabs"),
+        onRun: () => select("pdf"),
+      },
+      {
+        id: "theme",
+        label: t("command.action.toggleTheme"),
+        group: t("command.group.settings"),
+        shortcut: ["T"],
+        onRun: toggleTheme,
+      },
+      {
+        id: "lang",
+        label: t("command.action.toggleLang"),
+        group: t("command.group.settings"),
+        shortcut: ["L"],
+        onRun: toggleLocale,
+      },
+    ],
+    [
+      t,
+      convertAll,
+      cancelAll,
+      handleZip,
+      handleDownloadSeparate,
+      clearAll,
+      select,
+      toggleTheme,
+      toggleLocale,
+      canConvert,
+      canZip,
+      isBusy,
+      hasJobs,
+      stats.done,
+    ]
+  );
 
   const shortcuts = useMemo<ShortcutMap>(
     () => ({
@@ -177,142 +282,166 @@ export default function App() {
       <main className="w-full max-w-2xl glass rounded-[24px] sm:rounded-[28px] p-5 sm:p-8 md:p-10 animate-fade-in">
         <Tabs active={tab} onSelect={select} />
 
-        {!hasJobs ? (
-          <DropZone
-            onFiles={handleFiles}
-            tab={tab}
-            acceptedExtensions={meta.extensions}
-            acceptedMime={meta.accept}
-            labelKey={meta.labelKey}
-          />
-        ) : (
-          <div className="space-y-5 sm:space-y-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 sm:gap-3 text-xs text-white/40 tracking-wide flex-wrap">
-                <span>
-                  {stats.total} {t("stats.files")}
-                  {stats.total > 1 && t("stats.files") === "file" ? "s" : ""}
-                </span>
-                {stats.done > 0 && (
-                  <>
-                    <span className="w-px h-3 bg-white/15" />
-                    <span className="text-emerald-300/70">
-                      {stats.done} {t("stats.done")}
-                    </span>
-                  </>
-                )}
-                {stats.errors > 0 && (
-                  <>
-                    <span className="w-px h-3 bg-white/15" />
-                    <span className="text-red-300/70">
-                      {stats.errors} {t("stats.failed")}
-                    </span>
-                  </>
-                )}
-              </div>
-
-              <button
-                onClick={clearAll}
-                disabled={isBusy}
-                className="text-xs text-white/40 hover:text-white/80 transition disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
-              >
-                {t("actions.clearAll")}
-              </button>
-            </div>
-
-            <DropZone
-              onFiles={handleFiles}
-              compact
-              tab={tab}
-              acceptedExtensions={meta.extensions}
-              acceptedMime={meta.accept}
-              labelKey={meta.labelKey}
-            />
-
-            <FileList
-              jobs={jobs}
-              onRemove={removeJob}
-              onConvertOne={convertSingle}
-              onReorder={reorderJobs}
-              disabled={isBusy}
-            />
-
-            {tab === "images" && (
-              <ImageSettingsView
-                settings={imageSettings}
-                onUpdate={updateImageSettings}
+        <div key={tab} className="animate-slide-up">
+          {!hasJobs ? (
+            <>
+              <DropZone
+                onFiles={handleFiles}
+                tab={tab}
+                acceptedExtensions={meta.extensions}
+                acceptedMime={meta.accept}
+                labelKey={meta.labelKey}
               />
-            )}
-
-            {tab === "data" && (
-              <DataSettingsView
-                settings={dataSettings}
-                onUpdate={updateDataSettings}
-              />
-            )}
-
-            {tab === "pdf" && (
-              <PdfSettingsView
-                settings={pdfSettings}
-                onUpdate={updatePdfSettings}
-              />
-            )}
-
-            <div className="flex flex-col sm:flex-row gap-2">
-              {isBusy ? (
-                <Button onClick={cancelAll} className="flex-1">
-                  {t("actions.cancel")}
-                </Button>
-              ) : (
-                <Button
-                  onClick={convertAll}
-                  disabled={!canConvert}
-                  className="flex-1"
-                >
-                  {stats.queued + stats.errors > 0
-                    ? t("actions.convertN", {
-                        n: stats.queued + stats.errors,
-                      })
-                    : t("actions.allConverted")}
-                </Button>
-              )}
-
-              {stats.done > 0 && (
-                <div className="relative sm:shrink-0">
-                  <Button
-                    variant="ghost"
-                    onClick={() => setDownloadOpen((v) => !v)}
-                    disabled={!canZip}
-                  >
-                    {zipping
-                      ? t("actions.zipping")
-                      : `${t("actions.downloadAll")} (${stats.done})`}
-                  </Button>
-                  {downloadOpen && (
-                    <div className="absolute right-0 bottom-full mb-2 z-30 glass rounded-2xl p-1.5 min-w-[160px] shadow-xl">
-                      <button
-                        onClick={handleZip}
-                        className="w-full text-left px-3 py-2 rounded-xl text-sm text-white/80 hover:bg-white/[0.06] transition"
-                      >
-                        {t("actions.downloadZip")}
-                      </button>
-                      <button
-                        onClick={handleDownloadSeparate}
-                        className="w-full text-left px-3 py-2 rounded-xl text-sm text-white/80 hover:bg-white/[0.06] transition"
-                      >
-                        {t("actions.downloadSeparate")}
-                      </button>
-                    </div>
+              <QuickActions onSelect={(t) => select(t)} />
+            </>
+          ) : (
+            <div className="space-y-5 sm:space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 sm:gap-3 text-xs text-white/40 tracking-wide flex-wrap">
+                  <StatBadge value={stats.total} label={t("stats.files")} />
+                  {stats.done > 0 && (
+                    <>
+                      <span className="divider-y h-3" />
+                      <StatBadge
+                        value={stats.done}
+                        label={t("stats.done")}
+                        className="text-emerald-300/70"
+                      />
+                    </>
+                  )}
+                  {stats.errors > 0 && (
+                    <>
+                      <span className="divider-y h-3" />
+                      <StatBadge
+                        value={stats.errors}
+                        label={t("stats.failed")}
+                        className="text-red-300/70"
+                      />
+                    </>
                   )}
                 </div>
+
+                <button
+                  onClick={clearAll}
+                  disabled={isBusy}
+                  className="text-xs text-white/40 hover:text-white/80 transition disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
+                >
+                  {t("actions.clearAll")}
+                </button>
+              </div>
+
+              <DropZone
+                onFiles={handleFiles}
+                compact
+                tab={tab}
+                acceptedExtensions={meta.extensions}
+                acceptedMime={meta.accept}
+                labelKey={meta.labelKey}
+              />
+
+              <FileList
+                jobs={jobs}
+                onRemove={removeJob}
+                onConvertOne={convertSingle}
+                onReorder={reorderJobs}
+                disabled={isBusy}
+              />
+
+              {tab === "images" && (
+                <ImageSettingsView
+                  settings={imageSettings}
+                  onUpdate={updateImageSettings}
+                />
               )}
+
+              {tab === "data" && (
+                <DataSettingsView
+                  settings={dataSettings}
+                  onUpdate={updateDataSettings}
+                />
+              )}
+
+              {tab === "pdf" && (
+                <PdfSettingsView
+                  settings={pdfSettings}
+                  onUpdate={updatePdfSettings}
+                />
+              )}
+
+              <div className="flex flex-col sm:flex-row gap-2">
+                {isBusy ? (
+                  <Button onClick={cancelAll} className="flex-1">
+                    {t("actions.cancel")}
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={convertAll}
+                    disabled={!canConvert}
+                    className="flex-1"
+                  >
+                    {stats.queued + stats.errors > 0
+                      ? t("actions.convertN", {
+                          n: stats.queued + stats.errors,
+                        })
+                      : t("actions.allConverted")}
+                  </Button>
+                )}
+
+                {stats.done > 0 && (
+                  <div className="relative sm:shrink-0">
+                    <Button
+                      variant="ghost"
+                      onClick={() => setDownloadOpen((v) => !v)}
+                      disabled={!canZip}
+                    >
+                      {zipping
+                        ? t("actions.zipping")
+                        : `${t("actions.downloadAll")} (${stats.done})`}
+                    </Button>
+                    {downloadOpen && (
+                      <div className="absolute right-0 bottom-full mb-2 z-30 glass rounded-2xl p-1.5 min-w-[160px] shadow-xl animate-scale-in">
+                        <button
+                          onClick={handleZip}
+                          className="w-full text-left px-3 py-2 rounded-xl text-sm text-white/80 hover:bg-white/[0.06] transition"
+                        >
+                          {t("actions.downloadZip")}
+                        </button>
+                        <button
+                          onClick={handleDownloadSeparate}
+                          className="w-full text-left px-3 py-2 rounded-xl text-sm text-white/80 hover:bg-white/[0.06] transition"
+                        >
+                          {t("actions.downloadSeparate")}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </main>
 
       <ShortcutsHint />
+      <div className="mt-4">
+        <button
+          onClick={onBack}
+          className="text-xs text-white/30 hover:text-white/70 transition"
+        >
+          ← {t("nav.home")}
+        </button>
+      </div>
       <Footer />
+
+      <CommandPalette
+        open={cmdOpen}
+        onClose={() => setCmdOpen(false)}
+        actions={commands}
+      />
+
+      {showOnboarding && (
+        <Onboarding onClose={() => setShowOnboarding(false)} />
+      )}
     </div>
   );
 }
@@ -496,7 +625,7 @@ function DataSettingsView({
           }`}
         >
           <span
-            className={`absolute top-0.5 w-4 h-4 rounded-full transition-transform ${
+            className={`absolute top-0.5 w-4 h-4 rounded-full transition-transform duration-200 ${
               settings.pretty
                 ? "translate-x-5 bg-neutral-900"
                 : "translate-x-0.5 bg-white"
@@ -516,7 +645,6 @@ function PdfSettingsView({
   onUpdate: (patch: Partial<PdfSettings>) => void;
 }) {
   const { t } = useT();
-
   const isPdfToImages = settings.direction === "pdf-to-images";
 
   return (

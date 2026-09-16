@@ -7,6 +7,7 @@ export type Toast = {
   message: string;
   variant: ToastVariant;
   duration: number;
+  createdAt: number;
 };
 
 export type ToastContextValue = {

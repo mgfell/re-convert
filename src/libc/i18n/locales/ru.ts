@@ -95,10 +95,107 @@ export const ru: Record<TranslationKey, string> = {
   "compare.same": "Тот же размер",
   "compare.expand": "Развернуть превью",
   "compare.collapse": "Свернуть превью",
+
   "pdf.direction": "Направление",
   "pdf.imageFormat": "Формат картинок",
   "pdf.pageSize": "Размер страницы",
   "pdf.resolution": "Разрешение",
   "pdf.pages": "{{n}} страниц",
   "pdf.zipHint": "Несколько страниц → ZIP",
+
+  "quick.title": "Популярные конвертации",
+
+  "command.title": "Командная палитра",
+  "command.placeholder": "Введите команду…",
+  "command.noResults": "Ничего не найдено",
+  "command.navigate": "навигация",
+  "command.select": "выбрать",
+  "command.close": "закрыть",
+  "command.group.actions": "Действия",
+  "command.group.tabs": "Вкладки",
+  "command.group.settings": "Настройки",
+  "command.action.convert": "Конвертировать всё",
+  "command.action.clear": "Очистить очередь",
+  "command.action.cancel": "Отменить конвертацию",
+  "command.action.downloadZip": "Скачать всё как ZIP",
+  "command.action.downloadSeparate": "Скачать по одному",
+  "command.action.toggleTheme": "Сменить тему",
+  "command.action.toggleLang": "Сменить язык",
+  "command.action.openImages": "Открыть вкладку Картинки",
+  "command.action.openData": "Открыть вкладку Данные",
+  "command.action.openPdf": "Открыть вкладку PDF",
+
+  "landing.hero.badge": "Приватность по умолчанию",
+  "landing.hero.title": "Конвертируйте что угодно.",
+  "landing.hero.subtitle":
+    "Приватный конвертер файлов, который работает прямо в вашем браузере. Без загрузок, без серверов, без лимитов — файлы не покидают ваше устройство.",
+  "landing.hero.cta": "Начать",
+  "landing.hero.cta2": "Как это работает",
+  "landing.hero.noUpload": "Без загрузок",
+  "landing.hero.noLimits": "Без лимитов",
+  "landing.hero.noAds": "Без рекламы",
+
+  "landing.features.title": "Сделано иначе",
+  "landing.features.subtitle":
+    "Все остальные конвертеры отправляют ваши файлы на сервер. Мы — нет.",
+  "landing.feature.private.title": "100% приватно",
+  "landing.feature.private.text":
+    "Файлы обрабатываются локально в браузере. Ничего не загружается, не хранится, не передаётся.",
+  "landing.feature.fast.title": "Молниеносно",
+  "landing.feature.fast.text":
+    "Никакого ожидания загрузки и скачивания. Конвертация происходит мгновенно на вашем устройстве.",
+  "landing.feature.formats.title": "Нужные форматы",
+  "landing.feature.formats.text":
+    "Картинки (HEIC, PNG, JPG, WEBP, AVIF, ICO), PDF, данные (JSON, CSV, YAML, XML).",
+  "landing.feature.free.title": "Бесплатно навсегда",
+  "landing.feature.free.text":
+    "Без лимитов, регистрации и карт. Конвертируйте сколько хотите.",
+  "landing.feature.pwa.title": "Устанавливается как приложение",
+  "landing.feature.pwa.text":
+    "Работает офлайн как PWA. Установите и пользуйтесь где угодно.",
+  "landing.feature.i18n.title": "Мультиязычность",
+  "landing.feature.i18n.text":
+    "Английский и русский из коробки. Другие языки — скоро.",
+
+  "landing.formats.title": "Поддерживаемые форматы",
+  "landing.formats.subtitle":
+    "Растём каждую неделю. Нужен формат, которого нет — скажите.",
+  "landing.formats.images": "Картинки",
+  "landing.formats.data": "Данные",
+  "landing.formats.pdf": "PDF",
+
+  "landing.faq.title": "Есть вопросы?",
+  "landing.faq.q1": "Вы загружаете файлы на сервер?",
+  "landing.faq.a1":
+    "Нет. Всё работает локально в браузере через WebAssembly и Canvas API. Файлы не покидают ваше устройство.",
+  "landing.faq.q2": "Это правда бесплатно?",
+  "landing.faq.a2":
+    "Да. Нет сервера, нет лимитов, нет рекламы. Бесплатно навсегда.",
+  "landing.faq.q3": "Какие форматы поддерживаются?",
+  "landing.faq.a3":
+    "Картинки: PNG, JPG, WEBP, AVIF, ICO, HEIC, SVG, GIF, BMP. Данные: JSON, CSV, TSV, YAML, XML. PDF: туда и обратно. Новые форматы добавляются регулярно.",
+  "landing.faq.q4": "Работает ли офлайн?",
+  "landing.faq.a4":
+    "Да! После первой загрузки приложение работает полностью офлайн. Можно установить как PWA на телефон или компьютер.",
+
+  "landing.cta.title": "Готовы конвертировать?",
+  "landing.cta.subtitle": "Без регистрации. Без загрузок. Просто киньте файл.",
+  "landing.cta.button": "Открыть конвертер",
+
+  "landing.footer.madeWith": "Сделано с заботой. Работает на GitHub Pages.",
+
+  "nav.app": "Открыть приложение",
+  "nav.home": "Главная",
+  "onboarding.step1.title": "Перетащите файлы",
+  "onboarding.step1.text":
+    "Drag & drop, клик, или вставка из буфера. Принимаем картинки, PDF и данные.",
+  "onboarding.step2.title": "Выберите формат",
+  "onboarding.step2.text":
+    "Формат, качество, ресайз. Всё работает прямо в браузере.",
+  "onboarding.step3.title": "Скачайте мгновенно",
+  "onboarding.step3.text":
+    "Файлы не покидают устройство. Скачивайте по одному или ZIP-архивом.",
+  "onboarding.skip": "Пропустить",
+  "onboarding.next": "Далее",
+  "onboarding.done": "Понятно",
 };

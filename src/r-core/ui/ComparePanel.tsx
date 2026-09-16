@@ -44,7 +44,7 @@ export default function ComparePanel({ file, result }: Props) {
     : t("compare.same");
 
   return (
-    <div className="mt-3 rounded-xl bg-black/40 border border-white/[0.05] overflow-hidden">
+    <div className="mt-3 rounded-xl bg-black/40 border border-white/[0.05] overflow-hidden animate-scale-in">
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-2 border-b border-white/[0.05]">
         <div className="flex items-center gap-2 text-[11px] tracking-wide uppercase text-white/40">
@@ -67,7 +67,7 @@ export default function ComparePanel({ file, result }: Props) {
             <img
               src={originalUrl}
               alt="Original"
-              className={`w-full object-contain rounded-lg transition-all ${
+              className={`w-full object-contain rounded-lg transition-all duration-300 ${
                 expanded ? "max-h-[400px]" : "max-h-32"
               }`}
             />
@@ -81,7 +81,7 @@ export default function ComparePanel({ file, result }: Props) {
             <img
               src={result.url}
               alt="Result"
-              className={`w-full object-contain rounded-lg transition-all ${
+              className={`w-full object-contain rounded-lg transition-all duration-300 ${
                 expanded ? "max-h-[400px]" : "max-h-32"
               }`}
             />
@@ -135,7 +135,7 @@ export default function ComparePanel({ file, result }: Props) {
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className={`transition-transform ${
+            className={`transition-transform duration-300 ${
               expanded ? "rotate-180" : ""
             }`}
           >
@@ -222,7 +222,7 @@ function TextPreview({
 
   return (
     <pre
-      className={`w-full text-[10px] text-white/60 font-mono whitespace-pre-wrap break-all overflow-auto ${
+      className={`w-full text-[10px] text-white/60 font-mono whitespace-pre-wrap break-all overflow-auto transition-all duration-300 ${
         expanded ? "max-h-[400px]" : "max-h-32"
       }`}
     >
