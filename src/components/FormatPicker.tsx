@@ -19,14 +19,11 @@ export default function FormatPicker({ value, onChange }: Props) {
             <button
               key={format.id}
               onClick={() => onChange(format.id)}
-              className={`
-                rounded-xl py-3 px-2 transition-all duration-200 text-center
-                ${
-                  active
-                    ? "bg-white/[0.09] text-white border border-white/15"
-                    : "text-white/50 hover:text-white/80 border border-transparent"
-                }
-              `}
+              className={`rounded-xl py-3 px-2 transition-all duration-200 text-center ${
+                active
+                  ? "bg-white/[0.09] text-white border border-white/15"
+                  : "text-white/50 hover:text-white/80 border border-transparent"
+              }`}
             >
               <p className="font-medium text-sm tracking-wide">
                 {format.label}
