@@ -1,27 +1,32 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import type {
-  ConvertJob,
-  ConvertSettings,
-  ImageFormat,
-} from "../types/converter";
-import { convertImage } from "../converters/image";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { ConvertJob, ConvertResult } from "../types/converter";
+import type { ImageSettings } from "../types/images";
+import type { DataSettings } from "../types/data";
+import type { TabId } from "../types/tabs";
+import { convertImage } from "../converters/images";
+import { convertData } from "../converters/data";
 import { DEFAULT_QUALITY, DEFAULT_MAX_WIDTH } from "../config/formats";
 import { makeId } from "../lib/id";
 import { useToast } from "./useToast";
 
-export function useBatchConverter() {
+export function useBatchConverter(activeTab: TabId) {
   const [jobs, setJobs] = useState<ConvertJob[]>([]);
-  const [settings, setSettings] = useState<ConvertSettings>({
+
+  const [imageSettings, setImageSettings] = useState<ImageSettings>({
     format: "png",
     quality: DEFAULT_QUALITY,
     maxWidth: DEFAULT_MAX_WIDTH,
+  });
+
+  const [dataSettings, setDataSettings] = useState<DataSettings>({
+    format: "json",
+    pretty: true,
   });
 
   const { push } = useToast();
   const urlsRef = useRef<Set<string>>(new Set());
 
   const trackUrl = (url: string) => urlsRef.current.add(url);
-
   const untrackAndRevoke = (url: string | null | undefined) => {
     if (!url) return;
     if (urlsRef.current.has(url)) {
@@ -78,17 +83,32 @@ export function useBatchConverter() {
     });
   }, []);
 
-  const updateSettings = useCallback((patch: Partial<ConvertSettings>) => {
-    setSettings((prev) => ({ ...prev, ...patch }));
-  }, []);
+  const updateImageSettings = useCallback(
+    (patch: Partial<ImageSettings>) => {
+      setImageSettings((prev) => ({ ...prev, ...patch }));
+    },
+    []
+  );
 
-  const setFormat = useCallback(
-    (format: ImageFormat) => updateSettings({ format }),
-    [updateSettings]
+  const setImageFormat = useCallback(
+    (format: ImageSettings["format"]) => updateImageSettings({ format }),
+    [updateImageSettings]
+  );
+
+  const updateDataSettings = useCallback(
+    (patch: Partial<DataSettings>) => {
+      setDataSettings((prev) => ({ ...prev, ...patch }));
+    },
+    []
+  );
+
+  const setDataFormat = useCallback(
+    (format: DataSettings["format"]) => updateDataSettings({ format }),
+    [updateDataSettings]
   );
 
   const convertOne = useCallback(
-    async (job: ConvertJob, currentSettings: ConvertSettings) => {
+    async (job: ConvertJob, tab: TabId) => {
       setJobs((prev) =>
         prev.map((j) =>
           j.id === job.id
@@ -97,16 +117,21 @@ export function useBatchConverter() {
         )
       );
 
-      try {
-        const result = await convertImage(
-          job.file,
-          currentSettings.format,
-          currentSettings,
-          (p) =>
-            setJobs((prev) =>
-              prev.map((j) => (j.id === job.id ? { ...j, progress: p } : j))
-            )
+      const onProgress = (p: number) =>
+        setJobs((prev) =>
+          prev.map((j) => (j.id === job.id ? { ...j, progress: p } : j))
         );
+
+      try {
+        let result: ConvertResult;
+
+        if (tab === "images") {
+          result = await convertImage(job, imageSettings, onProgress);
+        } else if (tab === "data") {
+          result = await convertData(job, dataSettings, onProgress);
+        } else {
+          throw new Error(`Converter for "${tab}" is not available yet`);
+        }
 
         trackUrl(result.url);
 
@@ -126,7 +151,8 @@ export function useBatchConverter() {
               ? {
                   ...j,
                   status: "error",
-                  error: e instanceof Error ? e.message : "Conversion error",
+                  error:
+                    e instanceof Error ? e.message : "Conversion error",
                 }
               : j
           )
@@ -134,7 +160,7 @@ export function useBatchConverter() {
         return false;
       }
     },
-    []
+    [imageSettings, dataSettings]
   );
 
   const convertAll = useCallback(async () => {
@@ -147,7 +173,7 @@ export function useBatchConverter() {
     let failed = 0;
 
     for (const job of snapshot) {
-      const success = await convertOne(job, settings);
+      const success = await convertOne(job, activeTab);
       success ? ok++ : failed++;
     }
 
@@ -158,43 +184,49 @@ export function useBatchConverter() {
     } else if (failed) {
       push(`All ${failed} failed`, "error");
     }
-  }, [jobs, settings, convertOne, push]);
+  }, [jobs, activeTab, convertOne, push]);
 
   const convertSingle = useCallback(
     async (id: string) => {
       const job = jobs.find((j) => j.id === id);
       if (!job) return;
 
-      const success = await convertOne(job, settings);
+      const success = await convertOne(job, activeTab);
       push(
         success ? "Converted successfully" : "Conversion failed",
         success ? "success" : "error",
         success ? 2500 : 3000
       );
     },
-    [jobs, settings, convertOne, push]
+    [jobs, activeTab, convertOne, push]
   );
 
-  const stats = {
-    total: jobs.length,
-    queued: jobs.filter((j) => j.status === "queued").length,
-    processing: jobs.filter((j) => j.status === "processing").length,
-    done: jobs.filter((j) => j.status === "done").length,
-    errors: jobs.filter((j) => j.status === "error").length,
-  };
+  const stats = useMemo(
+    () => ({
+      total: jobs.length,
+      queued: jobs.filter((j) => j.status === "queued").length,
+      processing: jobs.filter((j) => j.status === "processing").length,
+      done: jobs.filter((j) => j.status === "done").length,
+      errors: jobs.filter((j) => j.status === "error").length,
+    }),
+    [jobs]
+  );
 
   const isBusy = stats.processing > 0;
 
   return {
     jobs,
-    settings,
     stats,
     isBusy,
+    imageSettings,
+    dataSettings,
+    updateImageSettings,
+    updateDataSettings,
+    setImageFormat,
+    setDataFormat,
     addFiles,
     removeJob,
     clearAll,
-    setFormat,
-    updateSettings,
     convertAll,
     convertSingle,
   };

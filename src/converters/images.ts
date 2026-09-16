@@ -1,21 +1,18 @@
-import type {
-  ConvertResult,
-  Converter,
-  ImageFormat,
-} from "../types/converter";
-import { getFormat } from "../config/formats";
+import type { ConvertJob, ConvertResult } from "../types/converter";
+import type { ImageSettings } from "../types/images";
+import { getImageFormat } from "../config/formats";
 import { loadImage } from "../lib/loadImage";
+import { canvasToBlob } from "../lib/canvasToBlob";
 
-export const convertImage: Converter<ImageFormat> = async (
-  file,
-  format,
-  settings,
-  onProgress
-) => {
+export async function convertImage(
+  job: ConvertJob,
+  settings: ImageSettings,
+  onProgress?: (p: number) => void
+): Promise<ConvertResult> {
   onProgress?.(5);
 
-  const formatConfig = getFormat(format);
-  const img = await loadImage(file);
+  const formatConfig = getImageFormat(settings.format);
+  const img = await loadImage(job.file);
   onProgress?.(25);
 
   let width = img.width;
@@ -49,18 +46,11 @@ export const convertImage: Converter<ImageFormat> = async (
     ? Math.min(Math.max(settings.quality, 1), 100) / 100
     : undefined;
 
-  const blob = await new Promise<Blob>((resolve, reject) => {
-    canvas.toBlob(
-      (b) => (b ? resolve(b) : reject(new Error("Export failed"))),
-      formatConfig.mime,
-      quality
-    );
-  });
-
+  const blob = await canvasToBlob(canvas, formatConfig.mime, quality);
   onProgress?.(100);
 
   const url = URL.createObjectURL(blob);
-  const baseName = file.name.replace(/\.[^.]+$/, "");
+  const baseName = job.file.name.replace(/\.[^.]+$/, "");
   const name = `${baseName}.${formatConfig.extension}`;
 
   return {
@@ -70,5 +60,5 @@ export const convertImage: Converter<ImageFormat> = async (
     size: blob.size,
     width,
     height,
-  } satisfies ConvertResult;
-};
+  };
+}

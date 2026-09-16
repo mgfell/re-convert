@@ -1,19 +1,19 @@
-import { IMAGE_FORMATS } from "../config/formats";
-import type { ImageFormat } from "../types/images";
+import { DATA_FORMATS } from "../config/dataFormats";
+import type { DataFormat } from "../types/data";
 
 type Props = {
-  value: ImageFormat;
-  onChange: (format: ImageFormat) => void;
+  value: DataFormat;
+  onChange: (format: DataFormat) => void;
 };
 
-export default function FormatPicker({ value, onChange }: Props) {
+export default function DataFormatPicker({ value, onChange }: Props) {
   return (
     <div>
       <p className="text-[11px] tracking-[0.18em] uppercase text-white/40 mb-3">
         Output format
       </p>
       <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 p-1 rounded-2xl glass-soft">
-        {IMAGE_FORMATS.map((format) => {
+        {DATA_FORMATS.map((format) => {
           const active = value === format.id;
           return (
             <button

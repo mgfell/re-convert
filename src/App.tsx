@@ -1,6 +1,7 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import Tabs from "./components/Tabs";
 import DropZone from "./components/DropZone";
 import FileList from "./components/FileList";
 import SettingsPanel from "./components/SettingsPanel";
@@ -8,27 +9,34 @@ import Button from "./components/Button";
 import ThemeToggle from "./components/ThemeToggle";
 import ShortcutsHint from "./components/ShortcutsHint";
 import { useBatchConverter } from "./hooks/useBatchConverter";
+import { useActiveTab } from "./hooks/useActiveTab";
 import { useToast } from "./hooks/useToast";
 import { useKeyboard, type ShortcutMap } from "./hooks/useKeyboard";
 import { usePasteFiles } from "./hooks/usePasteFiles";
 import { useTheme } from "./hooks/useTheme";
+import { detectFileType, isFileSupported } from "./lib/detectFileType";
 import { buildZip } from "./lib/zip";
 import { downloadBlob } from "./lib/download";
 
 export default function App() {
+  const { tab, select, auto } = useActiveTab("images");
+
   const {
     jobs,
-    settings,
     stats,
     isBusy,
+    imageSettings,
+    dataSettings,
+    updateImageSettings,
+    updateDataSettings,
+    setImageFormat,
+    setDataFormat,
     addFiles,
     removeJob,
     clearAll,
-    setFormat,
-    updateSettings,
     convertAll,
     convertSingle,
-  } = useBatchConverter();
+  } = useBatchConverter(tab);
 
   const { push } = useToast();
   const { toggle: toggleTheme } = useTheme();
@@ -54,7 +62,25 @@ export default function App() {
     }
   };
 
-  usePasteFiles(addFiles);
+  const handleFiles = useCallback(
+    (files: File[]) => {
+      if (!files.length) return;
+
+      const supported = files.filter(isFileSupported);
+      if (!supported.length) {
+        push("No supported files", "error");
+        return;
+      }
+
+      const detected = detectFileType(supported[0]);
+      if (detected) auto(detected);
+
+      addFiles(supported);
+    },
+    [addFiles, auto, push]
+  );
+
+  usePasteFiles(handleFiles);
 
   const shortcuts = useMemo<ShortcutMap>(
     () => ({
@@ -77,8 +103,10 @@ export default function App() {
       <Header />
 
       <main className="w-full max-w-2xl glass rounded-[24px] sm:rounded-[28px] p-5 sm:p-8 md:p-10 animate-fade-in">
+        <Tabs active={tab} onSelect={select} />
+
         {!hasJobs ? (
-          <DropZone onFiles={addFiles} />
+          <DropZone onFiles={handleFiles} tab={tab} />
         ) : (
           <div className="space-y-5 sm:space-y-6">
             <div className="flex items-center justify-between">
@@ -113,7 +141,7 @@ export default function App() {
               </button>
             </div>
 
-            <DropZone onFiles={addFiles} compact />
+            <DropZone onFiles={handleFiles} compact tab={tab} />
 
             <FileList
               jobs={jobs}
@@ -122,9 +150,13 @@ export default function App() {
             />
 
             <SettingsPanel
-              settings={settings}
-              onFormatChange={setFormat}
-              onUpdate={updateSettings}
+              tab={tab}
+              imageSettings={imageSettings}
+              dataSettings={dataSettings}
+              onImageFormatChange={setImageFormat}
+              onImageUpdate={updateImageSettings}
+              onDataFormatChange={setDataFormat}
+              onDataUpdate={updateDataSettings}
             />
 
             <div className="flex flex-col sm:flex-row gap-2">

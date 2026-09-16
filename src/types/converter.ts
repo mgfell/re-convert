@@ -1,5 +1,3 @@
-export type ImageFormat = "png" | "jpeg" | "webp";
-
 export type ConvertStatus =
   | "queued"
   | "processing"
@@ -7,19 +5,14 @@ export type ConvertStatus =
   | "error"
   | "cancelled";
 
-export type ConvertSettings = {
-  format: ImageFormat;
-  quality: number;
-  maxWidth: number | null;
-};
-
 export type ConvertResult = {
   blob: Blob;
   url: string;
   name: string;
   size: number;
-  width: number;
-  height: number;
+  width?: number;
+  height?: number;
+  meta?: Record<string, string | number>;
 };
 
 export type ConvertJob = {
@@ -31,9 +24,8 @@ export type ConvertJob = {
   error: string | null;
 };
 
-export type Converter<TFormat extends string> = (
-  file: File,
-  format: TFormat,
-  settings: ConvertSettings,
-  onProgress?: (progress: number) => void
+export type BaseConverter<TSettings> = (
+  job: ConvertJob,
+  settings: TSettings,
+  onProgress?: (p: number) => void
 ) => Promise<ConvertResult>;

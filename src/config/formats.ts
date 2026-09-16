@@ -1,6 +1,6 @@
-import type { ImageFormat } from "../types/converter";
+import type { ImageFormat } from "../types/images";
 
-export type FormatOption = {
+export type ImageFormatOption = {
   id: ImageFormat;
   label: string;
   description: string;
@@ -10,7 +10,7 @@ export type FormatOption = {
   supportsQuality: boolean;
 };
 
-export const IMAGE_FORMATS: FormatOption[] = [
+export const IMAGE_FORMATS: ImageFormatOption[] = [
   {
     id: "png",
     label: "PNG",
@@ -38,15 +38,48 @@ export const IMAGE_FORMATS: FormatOption[] = [
     supportsTransparency: true,
     supportsQuality: true,
   },
+  {
+    id: "avif",
+    label: "AVIF",
+    description: "Next-gen, tiny",
+    mime: "image/avif",
+    extension: "avif",
+    supportsTransparency: true,
+    supportsQuality: true,
+  },
+  {
+    id: "ico",
+    label: "ICO",
+    description: "Favicon, icons",
+    mime: "image/x-icon",
+    extension: "ico",
+    supportsTransparency: true,
+    supportsQuality: false,
+  },
 ];
 
-export const ACCEPTED_IMAGE_TYPES = "image/*";
+export const IMAGE_INPUT_EXTENSIONS = [
+  "png",
+  "jpg",
+  "jpeg",
+  "webp",
+  "gif",
+  "bmp",
+  "avif",
+  "svg",
+  "ico",
+  "heic",
+  "heif",
+];
+
+export const IMAGE_INPUT_ACCEPT =
+  "image/*,.heic,.heif,.avif,.svg,.ico";
 
 export const DEFAULT_QUALITY = 92;
 export const DEFAULT_MAX_WIDTH: number | null = null;
 
-export function getFormat(id: ImageFormat): FormatOption {
+export function getImageFormat(id: ImageFormat): ImageFormatOption {
   const found = IMAGE_FORMATS.find((f) => f.id === id);
-  if (!found) throw new Error(`Unknown format: ${id}`);
+  if (!found) throw new Error(`Unknown image format: ${id}`);
   return found;
 }

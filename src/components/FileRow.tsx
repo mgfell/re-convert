@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import type { ConvertJob } from "../types/converter";
 import {
   formatFileSize,
@@ -60,10 +61,14 @@ export default function FileRow({ job, onRemove, onConvertOne }: Props) {
                 <span className="text-emerald-300/70">
                   {formatFileSize(job.result.size)}
                 </span>
-                <span className="w-px h-3 bg-white/15" />
-                <span>
-                  {formatDimensions(job.result.width, job.result.height)}
-                </span>
+                {job.result.width && job.result.height && (
+                  <>
+                    <span className="w-px h-3 bg-white/15" />
+                    <span>
+                      {formatDimensions(job.result.width, job.result.height)}
+                    </span>
+                  </>
+                )}
               </>
             )}
 
@@ -155,15 +160,66 @@ export default function FileRow({ job, onRemove, onConvertOne }: Props) {
         </div>
       </div>
 
-      {isDone && job.result && (
-        <div className="mt-3 rounded-xl bg-black/40 border border-white/[0.05] p-2">
-          <img
-            src={job.result.url}
-            alt="Preview"
-            className="w-full max-h-40 object-contain rounded-lg"
-          />
-        </div>
-      )}
+      {isDone && job.result && <ResultPreview result={job.result} />}
+    </div>
+  );
+}
+
+type Result = NonNullable<ConvertJob["result"]>;
+
+function ResultPreview({ result }: { result: Result }) {
+  const isImage = result.blob.type.startsWith("image/");
+  const isText =
+    result.blob.type.startsWith("text/") ||
+    result.blob.type.includes("json") ||
+    result.blob.type.includes("yaml") ||
+    result.blob.type.includes("xml") ||
+    result.blob.type.includes("csv") ||
+    result.blob.type.includes("tab-separated");
+
+  if (isImage) return <ImagePreview url={result.url} />;
+  if (isText) return <TextPreview result={result} />;
+  return null;
+}
+
+function ImagePreview({ url }: { url: string }) {
+  return (
+    <div className="mt-3 rounded-xl bg-black/40 border border-white/[0.05] p-2">
+      <img
+        src={url}
+        alt="Preview"
+        className="w-full max-h-40 object-contain rounded-lg"
+      />
+    </div>
+  );
+}
+
+function TextPreview({ result }: { result: Result }) {
+  const [text, setText] = useState<string>("");
+
+  useEffect(() => {
+    let cancelled = false;
+    result.blob
+      .text()
+      .then((t) => {
+        if (!cancelled) setText(t.slice(0, 1000));
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [result]);
+
+  if (!text) return null;
+
+  const truncated = text.length >= 1000;
+
+  return (
+    <div className="mt-3 rounded-xl bg-black/40 border border-white/[0.05] p-3 max-h-40 overflow-auto">
+      <pre className="text-[11px] text-white/60 font-mono whitespace-pre-wrap break-all">
+        {text}
+        {truncated ? "\n…" : ""}
+      </pre>
     </div>
   );
 }
