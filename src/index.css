@@ -1,0 +1,95 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body, #root {
+    height: 100%;
+    margin: 0;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: #e8e8ec;
+    background: #08090c;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+}
+
+@layer components {
+  /* Deep, restrained background */
+  .bg-aurora {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 0%, #14161d 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 80% 100%, #0f1117 0%, transparent 60%),
+      linear-gradient(180deg, #08090c 0%, #0a0b0f 100%);
+  }
+
+  /* Very subtle noise/vignette layer */
+  .bg-aurora::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      ellipse at center,
+      transparent 30%,
+      rgba(0, 0, 0, 0.5) 100%
+    );
+    pointer-events: none;
+  }
+
+  /* Massive, solid glass panel */
+  .glass {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.045) 0%,
+      rgba(255, 255, 255, 0.025) 100%
+    );
+    backdrop-filter: blur(32px) saturate(140%);
+    -webkit-backdrop-filter: blur(32px) saturate(140%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow:
+      0 1px 0 0 rgba(255, 255, 255, 0.06) inset,
+      0 24px 60px -20px rgba(0, 0, 0, 0.8),
+      0 8px 24px -12px rgba(0, 0, 0, 0.6);
+  }
+
+  /* Slightly lighter glass for nested elements */
+  .glass-soft {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.04) inset;
+  }
+
+  .glass-hover {
+    transition: background 0.25s ease, border-color 0.25s ease,
+      transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .glass-hover:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.12);
+    transform: translateY(-1px);
+  }
+
+  /* Soft, cool accent */
+  .accent-line {
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(160, 170, 200, 0.4),
+      transparent
+    );
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
