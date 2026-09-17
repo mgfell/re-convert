@@ -21,9 +21,9 @@ export async function renderPage(
   if (!ctx) throw new Error("Failed to create canvas context");
 
   await page.render({
+    canvas,
     canvasContext: ctx,
     viewport,
-    canvas,
   }).promise;
 
   return { canvas, width: canvas.width, height: canvas.height };
