@@ -4,44 +4,50 @@ export type SeoMeta = {
   title: string;
   description?: string;
   keywords?: string[];
-  ogImage?: string;
+  canonical?: string;
 };
 
-function setMeta(name: string, content: string) {
-  let el = document.querySelector(`meta[name="${name}"]`);
+const BASE_URL = "https://mgfell.github.io/re-convert";
+
+function setMeta(attr: "name" | "property", key: string, content: string) {
+  let el = document.querySelector(`meta[${attr}="${key}"]`);
   if (!el) {
     el = document.createElement("meta");
-    el.setAttribute("name", name);
+    el.setAttribute(attr, key);
     document.head.appendChild(el);
   }
   el.setAttribute("content", content);
 }
 
-function setOg(property: string, content: string) {
-  let el = document.querySelector(`meta[property="${property}"]`);
+function setCanonical(url: string) {
+  let el = document.querySelector('link[rel="canonical"]');
   if (!el) {
-    el = document.createElement("meta");
-    el.setAttribute("property", property);
+    el = document.createElement("link");
+    el.setAttribute("rel", "canonical");
     document.head.appendChild(el);
   }
-  el.setAttribute("content", content);
+  el.setAttribute("href", url);
 }
 
 export function useSeoMeta(meta: SeoMeta) {
   useEffect(() => {
     document.title = meta.title;
-    setOg("og:title", meta.title);
-    setOg("og:type", "website");
+    setMeta("property", "og:title", meta.title);
+    setMeta("property", "og:type", "website");
 
     if (meta.description) {
-      setMeta("description", meta.description);
-      setOg("og:description", meta.description);
+      setMeta("name", "description", meta.description);
+      setMeta("property", "og:description", meta.description);
     }
     if (meta.keywords && meta.keywords.length > 0) {
-      setMeta("keywords", meta.keywords.join(", "));
+      setMeta("name", "keywords", meta.keywords.join(", "));
     }
-    if (meta.ogImage) {
-      setOg("og:image", meta.ogImage);
+    if (meta.canonical) {
+      const fullUrl = meta.canonical.startsWith("http")
+        ? meta.canonical
+        : `${BASE_URL}${meta.canonical}`;
+      setCanonical(fullUrl);
+      setMeta("property", "og:url", fullUrl);
     }
   }, [meta]);
 }

@@ -217,4 +217,5 @@ export const en: Record<TranslationKey, string> = {
   "seo.cta.title": "Convert {{from}} to {{to}} now",
   "seo.cta.button": "Open converter",
   "seo.notFound": "Page not found",
+  "seo.whyTitle": "Why convert {{from}} to {{to}}?",
 };

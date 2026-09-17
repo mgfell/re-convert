@@ -3,6 +3,7 @@ import type { SeoPageConfig } from "./config";
 import { getSeoPagesByCategory } from "./config";
 import { useT } from "@/libc/i18n/useT";
 import { useTheme } from "../vga/hooks/useTheme";
+import { useSeoMeta } from "./useSeoMeta";
 import ThemeToggle from "../hw/ThemeToggle";
 import LangToggle from "../hw/LangToggle";
 import Footer from "../ui/Footer";
@@ -13,22 +14,28 @@ type Props = {
   onNavigateSlug: (slug: string) => void;
 };
 
+const BASE_URL = "https://mgfell.github.io/re-convert";
+
 export default function SeoPage({ page, onEnterApp, onNavigateSlug }: Props) {
   const { t } = useT();
   useTheme();
 
+  useSeoMeta({
+    title: `${page.from} to ${page.to} — Free Online Converter | re:convert`,
+    description: page.description,
+    keywords: page.keywords,
+    canonical: `/${page.url}/`,
+  });
+
   useEffect(() => {
-    const title = `${page.from} to ${page.to} — Free Online Converter | re:convert`;
-    document.title = title;
+    const id = "seo-jsonld";
+    const existing = document.getElementById(id);
+    if (existing) existing.remove();
 
-    setMeta("description", page.description);
-    setMeta("keywords", page.keywords.join(", "));
-
-    setOg("og:title", title);
-    setOg("og:description", page.description);
-    setOg("og:type", "website");
-
-    setJsonLd({
+    const script = document.createElement("script");
+    script.id = id;
+    script.type = "application/ld+json";
+    script.textContent = JSON.stringify({
       "@context": "https://schema.org",
       "@graph": [
         {
@@ -37,6 +44,7 @@ export default function SeoPage({ page, onEnterApp, onNavigateSlug }: Props) {
           applicationCategory: "UtilitiesApplication",
           operatingSystem: "Any",
           description: page.description,
+          url: `${BASE_URL}/${page.url}/`,
           offers: {
             "@type": "Offer",
             price: "0",
@@ -60,9 +68,11 @@ export default function SeoPage({ page, onEnterApp, onNavigateSlug }: Props) {
           : []),
       ],
     });
+    document.head.appendChild(script);
 
     return () => {
-      setJsonLd(null);
+      const el = document.getElementById(id);
+      if (el) el.remove();
     };
   }, [page]);
 
@@ -75,19 +85,23 @@ export default function SeoPage({ page, onEnterApp, onNavigateSlug }: Props) {
       <ThemeToggle />
       <LangToggle />
 
-      {/* Breadcrumbs */}
       <nav className="max-w-4xl w-full mx-auto px-6 pt-8 text-xs text-white/35">
-        <button
-          onClick={() => (window.location.hash = "")}
+        <a
+          href={`${BASE_URL}/`}
+          onClick={(e) => {
+            e.preventDefault();
+            window.location.hash = "";
+          }}
           className="hover:text-white/70 transition"
         >
           {t("nav.home")}
-        </button>
+        </a>
         <span className="mx-2">/</span>
-        <span className="text-white/60">{page.from} → {page.to}</span>
+        <span className="text-white/60">
+          {page.from} → {page.to}
+        </span>
       </nav>
 
-      {/* Hero */}
       <section className="px-6 pt-10 pb-16">
         <div className="w-full max-w-3xl mx-auto text-center">
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-semibold tracking-tight text-white/95 leading-[1.05]">
@@ -99,7 +113,7 @@ export default function SeoPage({ page, onEnterApp, onNavigateSlug }: Props) {
           </h1>
 
           <p className="mt-6 text-white/50 text-lg max-w-xl mx-auto leading-relaxed">
-            {page.description}
+            {page.intro}
           </p>
 
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -131,7 +145,35 @@ export default function SeoPage({ page, onEnterApp, onNavigateSlug }: Props) {
         </div>
       </section>
 
-      {/* How it works */}
+      <section className="px-6 py-16 border-t border-white/[0.05]">
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-2xl md:text-3xl font-semibold text-white/95 mb-8">
+            {t("seo.whyTitle", { from: page.from, to: page.to })}
+          </h2>
+          <ul className="space-y-3">
+            {page.benefits.map((b, i) => (
+              <li key={i} className="flex items-start gap-3 text-white/55">
+                <span className="text-emerald-400/80 mt-0.5 shrink-0">
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M20 6L9 17l-5-5" />
+                  </svg>
+                </span>
+                <span>{b}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
       <section className="px-6 py-16 border-t border-white/[0.05]">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-2xl md:text-3xl font-semibold text-white/95 text-center mb-12">
@@ -139,26 +181,13 @@ export default function SeoPage({ page, onEnterApp, onNavigateSlug }: Props) {
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Step
-              num="1"
-              title={t("seo.step1.title")}
-              text={t("seo.step1.text")}
-            />
-            <Step
-              num="2"
-              title={t("seo.step2.title")}
-              text={t("seo.step2.text")}
-            />
-            <Step
-              num="3"
-              title={t("seo.step3.title")}
-              text={t("seo.step3.text")}
-            />
+            <Step num="1" title={t("seo.step1.title")} text={t("seo.step1.text")} />
+            <Step num="2" title={t("seo.step2.title")} text={t("seo.step2.text")} />
+            <Step num="3" title={t("seo.step3.title")} text={t("seo.step3.text")} />
           </div>
         </div>
       </section>
 
-      {/* FAQ */}
       {page.faq.length > 0 && (
         <section className="px-6 py-16 border-t border-white/[0.05]">
           <div className="max-w-3xl mx-auto">
@@ -197,7 +226,6 @@ export default function SeoPage({ page, onEnterApp, onNavigateSlug }: Props) {
         </section>
       )}
 
-      {/* Related */}
       {related.length > 0 && (
         <section className="px-6 py-16 border-t border-white/[0.05]">
           <div className="max-w-4xl mx-auto">
@@ -221,7 +249,6 @@ export default function SeoPage({ page, onEnterApp, onNavigateSlug }: Props) {
         </section>
       )}
 
-      {/* CTA */}
       <section className="px-6 py-16 border-t border-white/[0.05]">
         <div className="max-w-2xl mx-auto text-center">
           <h2 className="text-2xl md:text-3xl font-semibold text-white/95">
@@ -271,37 +298,4 @@ function Step({
       <p className="text-sm text-white/45 leading-relaxed">{text}</p>
     </div>
   );
-}
-
-function setMeta(name: string, content: string) {
-  let el = document.querySelector(`meta[name="${name}"]`);
-  if (!el) {
-    el = document.createElement("meta");
-    el.setAttribute("name", name);
-    document.head.appendChild(el);
-  }
-  el.setAttribute("content", content);
-}
-
-function setOg(property: string, content: string) {
-  let el = document.querySelector(`meta[property="${property}"]`);
-  if (!el) {
-    el = document.createElement("meta");
-    el.setAttribute("property", property);
-    document.head.appendChild(el);
-  }
-  el.setAttribute("content", content);
-}
-
-function setJsonLd(data: unknown) {
-  const id = "seo-jsonld";
-  const existing = document.getElementById(id);
-  if (existing) existing.remove();
-  if (!data) return;
-
-  const script = document.createElement("script");
-  script.id = id;
-  script.type = "application/ld+json";
-  script.textContent = JSON.stringify(data);
-  document.head.appendChild(script);
 }

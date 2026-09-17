@@ -172,4 +172,5 @@ export type TranslationKey =
   | "seo.related"
   | "seo.cta.title"
   | "seo.cta.button"
+  | "seo.whyTitle"
   | "seo.notFound";

@@ -217,4 +217,5 @@ export const ru: Record<TranslationKey, string> = {
   "seo.cta.title": "Сконвертировать {{from}} в {{to}}",
   "seo.cta.button": "Открыть конвертер",
   "seo.notFound": "Страница не найдена",
+  "seo.whyTitle": "Зачем конвертировать {{from}} в {{to}}?",
 };
